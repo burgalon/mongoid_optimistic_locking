@@ -15,9 +15,14 @@ module Mongoid::Lockable
   end
 
   def optimistic_atomic_selector
-  #def atomic_selector
     s = atomic_selector_old
-    s["_lock_version"] = _lock_version-1
+    if metadata && metadata.embedded?
+      path = metadata.path(self)
+      key = "#{path.path}._lock_version"
+    else
+      key = '_lock_version'
+    end
+    s[key] = _lock_version-1
     s
   end
 
