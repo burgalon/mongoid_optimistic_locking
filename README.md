@@ -35,7 +35,7 @@ For example:
             begin
                 post = Post.find(params[:id])
                 post.text += "---UPDATE---  " + params[:more_text]
-                post.save_optimistically!
+                post.save_optimistic!!
             rescue Mongoid::Errors::StaleDocument
                 retry
             end
