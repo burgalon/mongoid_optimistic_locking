@@ -23,6 +23,11 @@ describe Mongoid::Lockable do
     @post._lock_version.should == 1
   end
 
+  it "simulate a migration situation in which _lock_version did not exist" do
+    Post.update_all(_lock_version: nil)
+    @post.save_optimistic!.should == true
+  end
+
   describe "test root documents" do
     it "saves regularly if there's no other process changing the data in the background" do
       @post.text = 'changed-text'

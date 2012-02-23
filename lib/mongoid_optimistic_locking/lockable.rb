@@ -10,6 +10,7 @@ module Mongoid::Lockable
 
     # add callback to save tags index
     before_save do
+      self._lock_version=0 if self._lock_version.nil?
       self._lock_version += 1
     end
   end
@@ -22,7 +23,7 @@ module Mongoid::Lockable
     else
       key = '_lock_version'
     end
-    s[key] = _lock_version-1
+    s[key] = _lock_version==1 ? nil : _lock_version-1
     s
   end
 
