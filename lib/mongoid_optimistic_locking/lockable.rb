@@ -35,7 +35,7 @@ module Mongoid::Lockable
     instance_eval do
       alias :atomic_selector :atomic_selector_old
     end
-    result =  Mongoid.database.command({getlasterror: 1})
+    result =  mongo_session.command({getlasterror: 1})
     unless result["updatedExisting"]
       self._lock_version -= 1
       raise Mongoid::Errors::StaleDocument.new(self.class, self)

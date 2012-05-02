@@ -4,8 +4,9 @@ Bundler.setup
 
 require 'mongoid'
 
+# Set the database that the spec suite connects to.
 Mongoid.configure do |config|
-  config.master = Mongo::Connection.new.db("mongoid_optimistic_locking_test")
+  config.connect_to('mongoid_optimistic_locking_test')
 end
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
