@@ -25,7 +25,7 @@ describe Mongoid::Lockable do
 
   it "simulate a migration situation in which _lock_version did not exist" do
     Post.update_all(_lock_version: nil)
-    @post.save_optimistic!.should == true
+    @post.reload.save_optimistic!.should == true
   end
 
   describe "test root documents" do
