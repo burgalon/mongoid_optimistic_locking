@@ -19,12 +19,13 @@ end
 
 describe Mongoid::Lockable do
   before :all do
-    @post = Post.create(text: 'original-text')
+    @post = Post.create(:text => 'original-text')
     @post._lock_version.should == 1
   end
 
   it "simulate a migration situation in which _lock_version did not exist" do
-    Post.update_all(_lock_version: nil)
+    Post.update_all(:_lock_version => nil)
+    @post.reload
     @post.save_optimistic!.should == true
   end
 
@@ -68,8 +69,8 @@ describe Mongoid::Lockable do
 
   describe "test embedded documents" do
     before :all do
-      @post = Post.create(text: 'original-text')
-      @comment = @post.comments.create!(text: 'First comment')
+      @post = Post.create(:text => 'original-text')
+      @comment = @post.comments.create!(:text => 'First comment')
     end
 
     it "saves regularly if there's no other process changing the data in the background" do
