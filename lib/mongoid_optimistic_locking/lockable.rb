@@ -5,7 +5,7 @@ module Mongoid::Lockable
   extend ActiveSupport::Concern
 
   included do
-    field :_lock_version, type: Integer, default: 0
+    field :_lock_version, :type => Integer, :default => 0
     alias :atomic_selector_old :atomic_selector
 
     # add callback to save tags index
@@ -35,7 +35,7 @@ module Mongoid::Lockable
     instance_eval do
       alias :atomic_selector :atomic_selector_old
     end
-    result =  mongo_session.command({getlasterror: 1})
+    result =  mongo_session.command({:getlasterror => 1})
     unless result["updatedExisting"]
       self._lock_version -= 1
       raise Mongoid::Errors::StaleDocument.new(self.class, self)
