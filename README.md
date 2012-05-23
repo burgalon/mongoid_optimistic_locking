@@ -7,6 +7,8 @@ The gem is an addon over Mongoid ODM.
 
 So far it works with the Rails 3 and Mongoid 2.4.
 
+Created branch for edge *Mongoid 3*
+
 ## Rails 3 Installation
 
 Add the gem to your gemfile
