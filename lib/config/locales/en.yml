@@ -2,5 +2,8 @@ en:
   mongoid:
     errors:
       messages:
-        stale:
-          Document class %{klass} with id(s) is stale and should be reloaded.
+        stale_document:
+          update:
+            "Attempted to update a stale document: %{klass}"
+          destroy:
+            "Attempted to destroy a stale document: %{klass}"

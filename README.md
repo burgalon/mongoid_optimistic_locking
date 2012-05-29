@@ -27,7 +27,7 @@ To use it, all you have to do is add include Mongoid::Lockable
     end
 
 This will add a _lock_version field in the document which will be incremented every time a save is called.
-In order a to save a document in a save manner, use the new <code>save_optimistic!</code> and <code>rescue Mongoid::Errors::StaleDocument</code> to handle applicative logic in case the object was changed.
+Be sure to rescue `Mongoid::Errors::StaleDocument` to handle applicative logic in case the object was changed.
 
 For example:
 
@@ -37,7 +37,7 @@ For example:
             begin
                 post = Post.find(params[:id])
                 post.text += "---UPDATE---  " + params[:more_text]
-                post.save_optimistic!
+                post.save
             rescue Mongoid::Errors::StaleDocument
                 retry
             end
