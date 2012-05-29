@@ -1,8 +1,10 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require 'spec_helper'
 
 class Post
   include Mongoid::Document
-  include Mongoid::Lockable
+  ::ActiveSupport::Deprecation.silence do
+    include Mongoid::Lockable
+  end
 
   field :title
 
@@ -11,13 +13,19 @@ end
 
 class Comment
   include Mongoid::Document
-  include Mongoid::Lockable
+  ::ActiveSupport::Deprecation.silence do
+    include Mongoid::Lockable
+  end
 
   field :text
   embedded_in :post
 end
 
 describe Mongoid::Lockable do
+
+  before { ::ActiveSupport::Deprecation.silenced = true }
+  after { ::ActiveSupport::Deprecation.silenced = false }
+
   before :all do
     @post = Post.create(:text => 'original-text')
     @post._lock_version.should == 1
