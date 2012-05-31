@@ -5,12 +5,14 @@ require "mongoid/optimistic_locking/version"
 Gem::Specification.new do |s|
   s.name        = "mongoid_optimistic_locking"
   s.version     = Mongoid::OptimisticLocking::VERSION
-  s.authors     = ["Alon Burg"]
-  s.email       = ["burgalon@gmail.com"]
-  s.homepage    = ""
+  s.authors     = ["Alon Burg", "John Nishinaga"]
+  s.email       = ["burgalon@gmail.com", "jingoro@casa-z.org"]
+  s.homepage    = "https://github.com/burgalon/mongoid_optimistic_locking"
   s.summary     = %q{Allows optimisitic locking for Mongoid models}
   s.description = %q{Allows optimisitic locking for Mongoid models. See https://github.com/burgalon/mongoid_optimistic_locking}
 
+  s.add_dependency 'mongoid', '~> 2.4'
+  s.add_development_dependency 'rake', '~> 0.9.0'
   s.add_development_dependency 'rspec', '~> 2.6'
   s.add_development_dependency 'bson_ext', '~> 1.5'
 
