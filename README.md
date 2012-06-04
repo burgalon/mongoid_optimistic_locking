@@ -6,7 +6,7 @@ The gem is an addon over [Mongoid ODM](http://mongoid.org/) and is based on [Act
 
 ## Compatibility
 
-So far it works with the Rails 3 and Mongoid 2.4.
+So far it works with the Rails 3 and Mongoid 2.4.x.
 
 Created branch for edge *Mongoid 3*.
 
@@ -23,7 +23,6 @@ To use it, all you have to do is add include `Mongoid::OptimisticLocking`:
     class Post
       include Mongoid::Document
       include Mongoid::OptimisticLocking
-
       field :text
     end
 
@@ -46,6 +45,28 @@ For example:
     end
 
 That's it!
+
+## Embedded Document Caveats
+
+While `Mongoid::OptimisticLocking` can be used to some degree within embedded documents, there are certain limitations due to Mongoid's document embedding callback structure. Consider the following example:
+
+    class Post
+      include Mongoid::Document
+      field :text
+      embeds_many :comments
+    end
+
+    class Comment
+      include Mongoid::Document
+      include Mongoid::OptimisticLocking
+      embedded_in :post
+      field :text
+    end
+
+    post = Post.new
+    comment = post.comments.build(:text => 'hello')
+    comment.save # will use optimistic locking checks
+    post.save # will not use optimistic locking checks
 
 ## Open sourced by
 

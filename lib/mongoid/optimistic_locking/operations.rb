@@ -24,13 +24,16 @@ module Mongoid
 
       def remove(*args)
         return super unless optimistic_locking?
-        set_lock_version_for_selector do
-          result = super
-          unless Mongoid.database.command({:getlasterror => 1})['updatedExisting']
-            raise Mongoid::Errors::StaleDocument.new('destroy', self)
-          end
-          result
+        # unfortunately mongoid doesn't support selectors for remove
+        # so we need to handle this making an update and then calling
+        # remove
+        begin
+          update *args
+        rescue Mongoid::Errors::StaleDocument
+          raise Mongoid::Errors::StaleDocument.new('destroy', self)
+          return true
         end
+        super
       end
 
       def atomic_selector
