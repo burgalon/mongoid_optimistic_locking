@@ -2,24 +2,35 @@ require 'spec_helper'
 
 describe Mongoid::OptimisticLocking do
 
+  COLLECTIONS = %w(Company Person Car State Flag City)
+
   before(:all) do
 
     class Company
       include Mongoid::Document
       field :name
+      has_many :people, :class_name => 'Person', :dependent => :destroy
     end
 
     class Person
       include Mongoid::Document
       include Mongoid::OptimisticLocking
       field :name
+      has_many :cars, :dependent => :destroy
+    end
+
+    class Car
+      include Mongoid::Document
+      include Mongoid::OptimisticLocking
+      field :color
+      belongs_to :person
     end
 
     class State
       include Mongoid::Document
       field :name
-      embeds_one :flag, :inverse_of => :state, :cascade_callbacks => true
-      embeds_many :cities, :class_name => 'City', :inverse_of => :state, :cascade_callbacks => true
+      embeds_one :flag, :inverse_of => :state
+      embeds_many :cities, :class_name => 'City', :inverse_of => :state
     end
 
     class Flag
@@ -38,18 +49,8 @@ describe Mongoid::OptimisticLocking do
 
   end
 
-  after(:all) do
-    Object.send :remove_const, :Company
-    Object.send :remove_const, :Person
-    Object.send :remove_const, :State
-    Object.send :remove_const, :City
-  end
-
-  before do
-    Company.delete_all
-    Person.delete_all
-    State.delete_all
-  end
+  after(:all) { COLLECTIONS.each { |n| Object.send(:remove_const, n) } }
+  before { (COLLECTIONS - %w(Flag City)).each { |n| n.constantize.delete_all } }
 
   context 'without optimistic locking' do
 
@@ -90,7 +91,7 @@ describe Mongoid::OptimisticLocking do
     it 'should allow destroying after create' do
       person.destroy.should be_true
       person.should be_frozen
-      person._lock_version.should == 2
+      person._lock_version.should == 1
       Person.count.should == 0
     end
 
@@ -98,7 +99,7 @@ describe Mongoid::OptimisticLocking do
       another = Person.find(person.id)
       another.destroy.should be_true
       another.should be_frozen
-      another._lock_version.should == 2
+      another._lock_version.should == 1
       Person.count.should == 0
     end
 
@@ -112,7 +113,7 @@ describe Mongoid::OptimisticLocking do
         @p1.save.should be_true
       end
 
-      it 'should fail when updating the second' do
+      it 'should raise an exception when updating the second' do
         expect {
           @p2.name = 'George'
           @p2.save
@@ -125,7 +126,7 @@ describe Mongoid::OptimisticLocking do
       end
     
       it 'should succeed when updating the second without locking, ' +
-         'then fail when updating the third' do
+         'then raise an exception when updating the third' do
         @p2.name = 'George'
         @p2.unlocked.save.should be_true
         expect {
@@ -134,7 +135,7 @@ describe Mongoid::OptimisticLocking do
         }.to raise_error(Mongoid::Errors::StaleDocument)
       end
 
-      it 'should fail when destroying the second' do
+      it 'should raise an exception when destroying the second' do
         expect {
           @p2.destroy
         }.to raise_error(Mongoid::Errors::StaleDocument)
@@ -147,14 +148,29 @@ describe Mongoid::OptimisticLocking do
       end
 
       it 'should succeed when destroying the second without locking, ' +
-         'then fail when destroying the third' do
+         'and succeed when destroying the third with locking' do
         @p2.unlocked.destroy
         Person.count.should == 0
-        expect {
-          @p3.destroy
-        }.to raise_error(Mongoid::Errors::StaleDocument)
+        @p3.destroy.should
       end
 
+    end
+
+    it 'should destroy dependents with dependent destroy option' do
+      Car.count.should == 0
+      person.cars.create(:color => 'Red')
+      person.destroy
+      Car.count.should == 0
+    end
+
+    it 'should destroy dependents with dependent destroy option even when they are concurrently edited' do
+      car1 = person.cars.create(:color => 'Red')
+      car2 = Car.find(car1.id)
+      car2.update_attribute :color, 'Green'
+      person.reload # important
+      person.destroy
+      Person.count.should == 0
+      Car.count.should == 0
     end
 
     it 'should give a deprecation warning for #save_optimistic!' do

@@ -2,19 +2,20 @@ module Mongoid
   module OptimisticLocking
     module Operations
 
-      def insert(*args)
+      def insert(options = {})
         return super unless optimistic_locking?
         increment_lock_version do
           super
         end
       end
 
-      def update(*args)
+      def update(options = {})
         return super unless optimistic_locking?
         set_lock_version_for_selector do
           increment_lock_version do
             result = super
-            unless Mongoid.database.command({:getlasterror => 1})['updatedExisting']
+            getlasterror = Mongoid.database.command({:getlasterror => 1})
+            if result && !getlasterror['updatedExisting']
               raise Mongoid::Errors::StaleDocument.new('update', self)
             end
             result
@@ -22,16 +23,14 @@ module Mongoid
         end
       end
 
-      def remove(*args)
-        return super unless optimistic_locking?
-        # unfortunately mongoid doesn't support selectors for remove
-        # so we need to handle this making an update and then calling
-        # remove
-        begin
-          update *args
-        rescue Mongoid::Errors::StaleDocument
+      def remove(options = {})
+        return super unless optimistic_locking? && persisted?
+        # we need to just see if the document exists and got updated with
+        # a higher lock version
+        existing = _reload # get the current root or embedded document
+        if existing.present? && existing['_lock_version'] &&
+           existing['_lock_version'].to_i > _lock_version.to_i
           raise Mongoid::Errors::StaleDocument.new('destroy', self)
-          return true
         end
         super
       end
