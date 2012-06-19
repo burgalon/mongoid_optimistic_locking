@@ -243,7 +243,7 @@ describe Mongoid::OptimisticLocking do
 
   context 'optimistic locking on an embeds_many document' do
 
-    let!(:state) { State.new(:name => 'California') }
+    let!(:state) { State.create!(:name => 'California') }
 
     it 'should be savable with no embeds' do
       state.name = 'Nevada'
