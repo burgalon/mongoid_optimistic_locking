@@ -76,3 +76,5 @@ While `Mongoid::OptimisticLocking` can be used to some degree within embedded do
 [Mongo Developer FAQ - How do I do transactions/locking?](http://docs.mongodb.org/manual/faq/developers/#how-do-i-do-transactions-and-locking-in-mongodb)
 
 [Mongo Atomic Operations - "Update if Current"](http://www.mongodb.org/display/DOCS/Atomic+Operations#AtomicOperations-%22UpdateifCurrent%22)
+
+[Presentation from "Startup Day" on Mongoid Optimistic Locking](https://speakerdeck.com/u/burgalon/p/mongoid-optimistic-locking)
