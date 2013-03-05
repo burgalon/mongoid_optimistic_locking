@@ -6,9 +6,9 @@ The gem is an addon over [Mongoid ODM](http://mongoid.org/) and is based on [Act
 
 ## Compatibility
 
-So far it works with the Rails 3 and Mongoid 2.4.x.
+Works with *Mongoid 3*.
 
-Created branch for edge *Mongoid 3*.
+For Mongoid 2 use version 0.0.2
 
 ## Rails 3 Installation
 
