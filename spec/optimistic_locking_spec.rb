@@ -47,6 +47,15 @@ describe Mongoid::OptimisticLocking do
       field :name
     end
 
+    class Hamburger
+      include Mongoid::Document
+      include Mongoid::OptimisticLocking
+      field :patty
+      field :toppings
+      validates :patty, presence: true
+      validates :toppings, presence: true
+    end
+
   end
 
   after(:all) { COLLECTIONS.each { |n| Object.send(:remove_const, n) } }
@@ -178,6 +187,20 @@ describe Mongoid::OptimisticLocking do
       person.save_optimistic!
     end
 
+  end
+
+  context 'optimistic locking on a document with validation' do
+    it 'should not incremement lock version when validation fails' do
+      burger = Hamburger.new
+      burger._lock_version.should == 0
+      burger.save.should == false
+      burger._lock_version.should == 0
+    end
+
+    it 'should allow creation when valid' do
+      burger = Hamburger.create({patty: 'beef', toppings: 'bacon'})
+      burger._lock_version.should == 1
+    end
   end
 
   context 'optimistic locking on an embeds_one document' do
