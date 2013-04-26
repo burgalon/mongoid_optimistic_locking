@@ -3,14 +3,14 @@ module Mongoid
     module Operations
 
       def insert(options = {})
-        return super unless optimistic_locking?
+        return super unless optimistic_locking? && valid?
         increment_lock_version do
           super
         end
       end
 
       def update(options = {})
-        return super unless optimistic_locking?
+        return super unless optimistic_locking? && valid?
         set_lock_version_for_selector do
           increment_lock_version do
             result = super
